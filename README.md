@@ -38,7 +38,7 @@ cd nutshell
 ```
 2. Add your code to `src/` directory 
 - It is recommended that you put all imports and method signatures into a `class.h` file. The `class.cpp` file is only for implementation. 
-- In the `class.cpp` file, import header file with `#include"class.h"`.
+- See class template in `src/templates/` (don't add your code under this directory).
 
 3. Compile source code & run app
 ```bash 
