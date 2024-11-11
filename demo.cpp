@@ -6,12 +6,12 @@
 #include<string> 
 #include<vector>
 #include<sys/wait.h>
-#include <algorithm> // find_if
-#include <cctype> // isspace
+#include<algorithm> // find_if
+#include<cctype> // isspace
 
 using namespace std; 
 
-vector<char*> parseCmd(const string& cmd) {
+vector<char*> parseSingleCmd(const string& cmd) {
     istringstream iss(cmd); 
     vector<string> tokens; 
     string token; 
@@ -24,18 +24,12 @@ vector<char*> parseCmd(const string& cmd) {
     for (auto& t: tokens) {
         args.push_back(&t[0]); 
     }
-    args.push_back(nullptr); 
+    args.push_back(nullptr); // char* because this bro :) 
 
     return args;
 }
 
-// void printArgs(vector<char*> args){ 
-//     for (auto& a: args){ 
-//         cout << a << "\n"; 
-//     }
-// }
-
-string trimCmd(const string& cmd){
+string trimSingleCmd(const string& cmd){
     auto validStart = find_if(cmd.begin(), cmd.end(), [](unsigned char ch) {
         return !isspace(ch);
     });
@@ -49,38 +43,55 @@ string trimCmd(const string& cmd){
             : ""; 
 }
 
+void execSingleCmd(const string& cmd){ 
+    string trimmedCmd = trimSingleCmd(cmd); 
+
+    if (cmd.compare("exit") == 0) {
+        printf("attempt exit");
+        exit(0); 
+    } // not working 
+
+    vector<char*> args = parseSingleCmd(cmd); 
+
+    pid_t rc = fork(); 
+    if (rc < 0){
+        perror("fork"); 
+    }
+    else if (rc == 0) { // child
+        if (execvp(args[0], args.data()) < 0) { 
+            perror("execvp"); 
+        }
+        exit(EXIT_FAILURE); 
+    }
+    else { // parent
+        int status; 
+        waitpid(rc, &status, 0); 
+    }
+}
+
+// vector<vector<char*>> parsePipedCmd(const string& pipedCmd){ 
+//     vector<vector<char*>> allCmdArgs; 
+//     istringstream iss(pipedCmd); 
+//     string oneCmd; 
+//     vector<char*> oneCmdArgs; 
+    
+//     while(getline(iss, oneCmd, '|')){
+//         oneCmdArgs = parseSingleCmd(oneCmd); 
+
+//         allCmdArgs.push_back(oneCmdArgs); 
+//     }
+    
+//     return allCmdArgs; 
+// }
+
 int main(){
-    // string exampleCmd = "ls ls ls la la la"; 
-    // vector<char*> exampleArgs = parseCmd(exampleCmd); 
-    // printArgs(exampleArgs); 
 
     while(1){ 
         cout << "nutshell> "; 
         string cmd; 
         getline(std::cin, cmd); 
 
-        cmd = trimCmd(cmd); 
-
-        if (cmd.compare("exit") == 0) {
-            break; 
-        }
-
-        vector<char*> args = parseCmd(cmd); 
-
-        pid_t rc = fork(); 
-        if (rc < 0){
-            perror("fork"); 
-        }
-        else if (rc == 0) { // child
-            if (execvp(args[0], args.data()) < 0) { 
-                perror("execvp"); 
-            }
-            exit(EXIT_FAILURE); 
-        }
-        else { // parent
-            int status; 
-            waitpid(rc, &status, 0); 
-        }
+        execSingleCmd(cmd); 
     }
 
     return 0; 
