@@ -11,13 +11,13 @@ A compact, minimal Linux shell written in C++
 | `>`    | Output Redirection: Redirects the output of a command to a file. |
 | `<`    | Input Redirection: Redirects the input of a command from a file. |
 | `&`   | Running process in background |  
-### Scripting support 
+<!-- ### Scripting support 
 Basic control flows for Bash-like scripting: 
 | Syntax | Explanation |
 |--------|-------------|
 | `while`| While Loop: Repeatedly executes a block of code as long as a condition is true. |
 | `if`   | If Statement: Executes a block of code if a specified condition is true. |
-| `else` | Else Statement: Executes a block of code if the condition in the `if` statement is false. |
+| `else` | Else Statement: Executes a block of code if the condition in the `if` statement is false. | -->
 ### Environment Variables
 - Environment variables for each session
 - `.nutshellrc` configuration file for persistent environment configuration
