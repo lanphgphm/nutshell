@@ -42,7 +42,7 @@ g++ demo.cpp -o demo
 ```bash
 ./demo
 ```
-- Interact with the shell by running commands like `ls -la`, `echo hello`, etc. 
+- Interact with the shell by running commands like `ls -la`, `echo hello`, `./hello` etc. 
 - Find out the commands that your terminal has that this shell does not 
 
 ## User Installation
