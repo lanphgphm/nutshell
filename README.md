@@ -18,34 +18,33 @@ Basic control flows for Bash-like scripting:
 | `while`| While Loop: Repeatedly executes a block of code as long as a condition is true. |
 | `if`   | If Statement: Executes a block of code if a specified condition is true. |
 | `else` | Else Statement: Executes a block of code if the condition in the `if` statement is false. |
-### Configure Environment 
+### Environment Variables
 - Environment variables for each session
 - `.nutshellrc` configuration file for persistent environment configuration
 
 ## Developer Setup 
 ### Requirements 
 - GCC 14.1.1 
+- CMake >= 3.16
 
 ### Recommended 
 - The recommended editor is Visual Studio Code or QtCreator 
 
 ### Build Instructions 
-1. Clone the repository & `cd` into the repository 
-```bash
+1. Clone the repository && `cd` into it
+```bash 
 git clone https://github.com/lanphgphm/nutshell.git
 cd nutshell 
 ```
-2. Compile source code (only demo file for now)
-```bash
-cd demo
-g++ demo.cpp -o demo  
+2. Add your code to `src/` directory 
+- It is recommended that you put all imports and method signatures into a `class.h` file. The `class.cpp` file is only for implementation. 
+- In the `class.cpp` file, import header file with `#include"class.h"`.
+
+3. Compile source code & run app
+```bash 
+cd build
+cmake .. && cmake --build . && ./appnutshell 
 ```
-3. Run the shell 
-```bash
-./demo
-```
-- Interact with the shell by running commands like `ls -la`, `echo hello`, `./hello` etc. 
-- Find out the commands that your terminal has that this shell does not 
 
 ## User Installation
 Not ready to be shipped to end-user.
