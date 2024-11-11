@@ -37,6 +37,7 @@ cd nutshell
 ```
 2. Compile source code (only demo file for now)
 ```bash
+cd demo
 g++ demo.cpp -o demo  
 ```
 3. Run the shell 
