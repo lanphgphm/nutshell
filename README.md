@@ -10,6 +10,7 @@ A compact, minimal Linux shell written in C++
 | `&&`   | Logical AND: Executes the second command only if the first command succeeds. |
 | `>`    | Output Redirection: Redirects the output of a command to a file. |
 | `<`    | Input Redirection: Redirects the input of a command from a file. |
+| `&`   | Running process in background |  
 ### Scripting support 
 Basic control flows for Bash-like scripting: 
 | Syntax | Explanation |
