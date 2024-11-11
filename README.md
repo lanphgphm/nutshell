@@ -49,8 +49,4 @@ cmake .. && cmake --build . && ./appnutshell
 ## User Installation
 Not ready to be shipped to end-user.
 
-## Helpful References 
-- [Purdue Guide on Writing OS Shell](https://www.cs.purdue.edu/homes/grr/SystemsProgrammingBook/Book/Chapter5-WritingYourOwnShell.pdf) -- Concise and relevant, with detailed overview of the data structures used to manage complex command 
-- [The Little Book about OS development](https://littleosbook.github.io/book.pdf) -- The part on Programmable Interrupt Controller (PIC) might be useful (very well might not be)
-- [Bash Full Grammar](https://pubs.opengroup.org/onlinepubs/9699919799.2016edition/utilities/V3_chap02.html#tag_18_10) 
 
