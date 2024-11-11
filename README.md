@@ -23,7 +23,7 @@ Basic control flows for Bash-like scripting:
 
 ## Developer Setup 
 ### Requirements 
-- GCC 14.1.1
+- GCC 14.1.1 
 
 ### Recommended 
 - The recommended editor is Visual Studio Code or QtCreator 
@@ -47,4 +47,8 @@ g++ demo.cpp -o demo
 
 ## User Installation
 Not ready to be shipped to end-user.
+
+## Helpful References 
+- [Purdue Guide on Writing OS Shell](https://www.cs.purdue.edu/homes/grr/SystemsProgrammingBook/Book/Chapter5-WritingYourOwnShell.pdf) -- Concise and relevant, with detailed overview of the data structures used to manage complex command 
+- [The Little Book about OS development](https://littleosbook.github.io/book.pdf) -- The part on Programmable Interrupt Controller (PIC) might be useful (very well might not be)
 
