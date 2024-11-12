@@ -1,24 +1,19 @@
 #include<iostream> // cin, cout
-#include<unistd.h> // fork, read, write, exec, dup, access, dup2, close
-#include<cstdlib> // getenv
-#include<stdlib.h> // exit
-#include<sys/types.h> // pid_t, ssize_t
-#include<sstream> // istringstream
 #include<string> // string
-#include<vector> // vector
-#include<sys/wait.h> // waitpid
-#include<algorithm> // find_if
-#include<cctype> // isspace
+
 
 #include"parser.h"
 #include"executor.h"
 
 using namespace std; 
 
+string litmus_test = "cat < input.txt | grep \"error\" > output.txt && echo \"Errors found\" || echo \"No errors found\" & ";
+
 int main(){
+    Parser parser; // share one instance across all big commands 
+
     while (true) {
-        Parser parser; 
-        Executor executor; 
+        Executor executor; // one instance per big command
 
         string input;
         cout << "nutshell@tester> ";
@@ -30,3 +25,5 @@ int main(){
     }
     return 0; 
 }
+
+// cat < input.txt | grep "error" > output.txt && echo "Errors found" || echo "No errors found" & 

@@ -13,10 +13,7 @@
 using namespace std; 
 
 // extern char** envvars; 
-char* envvars[] = {
-    (char*) "PATH=/home/lanphgphm/.rbenv/shims:/home/lanphgphm/.rbenv/shims:/home/lanphgphm/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/home/lanphgphm/bin:/home/lanphgphm/.local/share/gem/ruby/3.0.0/bin:/home/lanphgphm/.rbenv/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl", 
-    nullptr 
-};
+extern char** environ; 
 
 // Function to parse a single command into arguments
 vector<char*> parseSingleCmd(const string& cmd) {
@@ -84,7 +81,7 @@ void execSingleCmd(const string& cmd){
         perror("fork"); // Handle fork error
     }
     else if (rc == 0) { // Child process
-        if (execve(args[0], args.data(), envvars) < 0) { // Execute the command
+        if (execve(args[0], args.data(), environ) < 0) { // Execute the command
             perror("execve"); // Handle execve error
         }
         exit(EXIT_FAILURE); // Exit if execve fails

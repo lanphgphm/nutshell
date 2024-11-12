@@ -13,5 +13,15 @@
 #include<algorithm> // find_if
 #include<cctype> // isspace
 
+class Executor {
+public: 
+    Executor(); 
+    ~Executor(); 
+
+    void execute(const CommandTable& commandTable); 
+
+private: 
+    int fuckaroundandfindout; 
+}; 
 
 #endif //EXECUTOR_H

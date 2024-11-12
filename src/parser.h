@@ -18,15 +18,19 @@
   data and perform no operation. It is meant to be a dumb data plane 
   whose members are all public. 
 */
-struct SingleCommand{
+struct Command{
     std::string executable;         // first arg to execve()
-    std::vector<std::string> args;  // second arg to execve() 
-    std::string inputFile; 
-    std::string outputFile; 
+    std::vector<char*> args;  // second arg to execve() 
+    std::string inputFileName; 
+    std::string outputFileName; 
     bool pipingNext; 
 };
 
-using CommandTable = std::vector<SingleCommand>; // a workaround to avoid building AST :)
+struct CommandBlock {
+  std::vector<Command> commands; 
+};
+
+using CommandTable = std::vector<CommandBlock>; // a workaround to avoid building AST :)
 
 /*
   At the point of writing this, this shell don't need a separate Parser 
@@ -37,18 +41,21 @@ using CommandTable = std::vector<SingleCommand>; // a workaround to avoid buildi
   parsing from the CommandTable data structure. Future addition of 
   complex parsing would be easier if there is a separate class responsible
   for parsing :) 
+
+  The Parser class acts like the smart control-plane that handles the 
+  data stored by the dumb data-plane struct SingleCommand. 
 */
 class Parser {
 public: 
     Parser();  // constructor 
     ~Parser(); // destructor 
 
-    CommandTable parse(const std::string& bigcmd);  
+    CommandTable parse(const std::string& bigCommand);  
 
 private: 
-    std::string trimSingleCmd(const std::string& cmd); 
-    std::string resolvePath(const std::string& cmd); 
-    std::vector<char*> parseSingleCmd(const std::string& cmd); 
+    std::string trim(const std::string& command); 
+    std::string resolvePath(const std::string& command); 
+    std::vector<char*> parseSingleCommand(const std::string& command); 
 };
 
 #endif //PARSER_H
