@@ -1,5 +1,6 @@
 #include<iostream> // cin, cout
-#include<unistd.h> // fork, read, write, exec, dup2, close
+#include<unistd.h> // fork, read, write, exec, dup, access, dup2, close
+#include<cstdlib> // getenv
 #include<stdlib.h> // exit
 #include<sys/types.h> // pid_t, ssize_t
 #include<sstream> // istringstream
@@ -10,6 +11,12 @@
 #include<cctype> // isspace
 
 using namespace std; 
+
+// extern char** envvars; 
+char* envvars[] = {
+    (char*) "PATH=/home/lanphgphm/.rbenv/shims:/home/lanphgphm/.rbenv/shims:/home/lanphgphm/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/home/lanphgphm/bin:/home/lanphgphm/.local/share/gem/ruby/3.0.0/bin:/home/lanphgphm/.rbenv/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl", 
+    nullptr 
+};
 
 // Function to parse a single command into arguments
 vector<char*> parseSingleCmd(const string& cmd) {
@@ -49,19 +56,38 @@ string trimSingleCmd(const string& cmd){
             : ""; 
 }
 
+string resolvePath(const string& cmd){
+    char* pathEnvVar = getenv("PATH"); 
+    if (!pathEnvVar) return cmd; 
+
+    istringstream paths(pathEnvVar); 
+    string path; 
+
+    while (getline(paths, path, ':')){
+        string fullPath = path + "/" + cmd; 
+        if (access(fullPath.c_str(), X_OK) == 0){
+            return fullPath; 
+        }
+    }
+
+    return cmd; 
+}
+
 // Function to execute a single command
 void execSingleCmd(const string& cmd){ 
     vector<char*> args = parseSingleCmd(cmd); // Parse the command into arguments
+    string fullArg0Path = resolvePath(args[0]); // getting full path to the command executable 
+    args[0] = &fullArg0Path[0];
 
     pid_t rc = fork(); // Fork a new process
     if (rc < 0){
         perror("fork"); // Handle fork error
     }
     else if (rc == 0) { // Child process
-        if (execvp(args[0], args.data()) < 0) { // Execute the command
-            perror("execvp"); // Handle execvp error
+        if (execve(args[0], args.data(), envvars) < 0) { // Execute the command
+            perror("execve"); // Handle execve error
         }
-        exit(EXIT_FAILURE); // Exit if execvp fails
+        exit(EXIT_FAILURE); // Exit if execve fails
     }
     else { // Parent process
         int status; 
