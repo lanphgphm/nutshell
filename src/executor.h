@@ -13,15 +13,20 @@
 #include<algorithm> // find_if
 #include<cctype> // isspace
 
+#include"command.h" 
+
 class Executor {
 public: 
     Executor(); 
     ~Executor(); 
 
-    void execute(const CommandTable& commandTable); 
+    void execute(const ParsedCommand& cmd); 
 
 private: 
-    int fuckaroundandfindout; 
+    void executePiped(const ParsedCommand& cmd); 
+    void executeAndOr(const ParsedCommand& cmd); 
+    
+    void printError(); // change me 
 }; 
 
 #endif //EXECUTOR_H
