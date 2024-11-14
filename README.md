@@ -11,10 +11,6 @@ Currently supports up to 2 chaining commands.
 | `&&`   | Logical AND: Executes the second command only if the first command succeeds. |
 | `&`   | Running process in background |  
 
-### Environment Variables
-- Environment variables for each session
-- `.nutshellrc` configuration file for persistent environment configuration
-
 ## Developer Setup 
 ### Requirements 
 - GCC 14.1.1 
