@@ -6,8 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE HEADERS "src/*.h")
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
+include_directories(src)
+
 add_executable(appnutshell 
-    main.cpp
+    "main.cpp"
+    "src/command.h" "src/command.cpp" 
+    "src/executor.h" "src/executor.cpp"
 )
 
 include(GNUInstallDirs)

@@ -2,6 +2,8 @@
 
 using namespace std; 
 
+extern char** environ; 
+
 Executor::Executor(){}
 
 Executor::~Executor(){}
@@ -13,3 +15,5 @@ void Executor::executePiped(const ParsedCommand& cmd){}
 void Executor::executeAndOr(const ParsedCommand& cmd){}
 
 void Executor::printError(){}
+
+void Executor::debug(){}

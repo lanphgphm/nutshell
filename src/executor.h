@@ -21,11 +21,10 @@ public:
     ~Executor(); 
 
     void execute(const ParsedCommand& cmd); 
-
+    void debug(); // change me
 private: 
     void executePiped(const ParsedCommand& cmd); 
     void executeAndOr(const ParsedCommand& cmd); 
-    
     void printError(); // change me 
 }; 
 
