@@ -18,7 +18,7 @@
   data and perform no operation. It is meant to be a dumb data plane 
   whose members are all public. 
 */
-struct Command{
+struct Single{
     std::string executable;         // first arg to execve()
     std::vector<char*> args;  // second arg to execve() 
     std::string inputFileName; 
@@ -26,11 +26,18 @@ struct Command{
     bool pipingNext; 
 };
 
-struct CommandBlock {
-  std::vector<Command> commands; 
+enum class LogicOperator {
+	NONE, 
+	AND, 
+	OR
 };
 
-using CommandTable = std::vector<CommandBlock>; // a workaround to avoid building AST :)
+struct Block {
+  std::vector<Single> singles; 
+  LogicOperator nextOperator; 
+};
+
+using CommandTable = std::vector<Block>; // a workaround to avoid building AST :)
 
 /*
   At the point of writing this, this shell don't need a separate Parser 
@@ -50,12 +57,14 @@ public:
     Parser();  // constructor 
     ~Parser(); // destructor 
 
-    CommandTable parse(const std::string& bigCommand);  
+    CommandTable parse(const std::string& big);  
 
 private: 
-    std::string trim(const std::string& command); 
-    std::string resolvePath(const std::string& command); 
-    std::vector<char*> parseSingleCommand(const std::string& command); 
+    std::string trim(const std::string& str);  //
+    std::string resolvePath(const std::string& command); //
+    std::vector<char*> parseSingle(const std::string& single); //
+	std::vector<Block> parseIntoBlocks(const string& big); //
+	std::vector<Single> parseIntoSingle(const string& block); 
 };
 
 #endif //PARSER_H
