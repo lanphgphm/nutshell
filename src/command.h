@@ -12,13 +12,14 @@
 #include<sys/wait.h> // waitpid
 #include<algorithm> // find_if
 #include<cctype> // isspace
+#include<assert.h> // assert
 
 struct ParsedCommand{
-    bool inBackground; 
+    bool isEmpty = false; 
 
-    bool isPiping; 
-    bool isAnd; 
-    bool isOr; 
+    bool isPiping = false; 
+    bool isAnd = false; 
+    bool isOr = false; 
 
     std::string command1; 
     std::string executable1; 
@@ -35,10 +36,12 @@ public:
     ~Command(); 
 
     ParsedCommand parse(const std::string& command); 
+    void debug(const ParsedCommand& parsedCmd);
 private:  
-    std::string trim(const std::string& str); 
-    std::string resolvePath(const std::string& command); 
+    std::string trim(const std::string& command); 
+    std::string resolvePath(const std::string& arg0); 
     std::vector<char*> getArgsVector(const std::string& command); 
+    void displayUsage(); 
 };
 
 #endif //COMMAND_H

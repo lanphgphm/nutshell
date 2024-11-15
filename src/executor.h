@@ -2,7 +2,7 @@
 #define EXECUTOR_H
 
 #include<iostream> // cin, cout
-#include<unistd.h> // fork, read, write, exec, dup, access, dup2, close
+#include<unistd.h> // fork, read, write, exec, dup, access, dup2, close, 3 fds
 #include<cstdlib> // getenv
 #include<stdlib.h> // exit
 #include<sys/types.h> // pid_t, ssize_t
@@ -20,12 +20,13 @@ public:
     Executor(); 
     ~Executor(); 
 
-    void execute(const ParsedCommand& cmd); 
+    int statCmd1, statCmd2 = 69; // sometimes statCmd2 unused :) 
 
+    void execute(const ParsedCommand& cmd); 
+    void debug(); 
 private: 
-    void executePiped(const ParsedCommand& cmd); 
-    void executeAndOr(const ParsedCommand& cmd); 
-    
+    void executePiped(const ParsedCommand& cmd, int& statCmd1, int& statCmd2); 
+    void executeAndOr(const ParsedCommand& cmd, int& statCmd1, int& statCmd2); 
     void printError(); // change me 
 }; 
 
