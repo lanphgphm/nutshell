@@ -15,11 +15,11 @@
 #include<assert.h> // assert
 
 struct ParsedCommand{
-    bool inBackground; 
+    bool isEmpty = false; 
 
-    bool isPiping; 
-    bool isAnd; 
-    bool isOr; 
+    bool isPiping = false; 
+    bool isAnd = false; 
+    bool isOr = false; 
 
     std::string command1; 
     std::string executable1; 

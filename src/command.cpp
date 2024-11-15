@@ -6,58 +6,43 @@ Command::Command(){}
 
 Command::~Command(){}
 
-ParsedCommand Command::parse(const string& command){
+ParsedCommand Command::parse(const string& command) {
     ParsedCommand parsedCmd;
 
     string trimmedCmd = trim(command);
 
-    if (trimmedCmd.empty()){
-        cout << "Command must not be empty\n"; 
-        displayUsage(); 
-        return parsedCmd; 
+    if (trimmedCmd.empty()) {
+        cout << "Command must not be empty\n";
+        parsedCmd.isEmpty = true;
+        displayUsage();
+        return parsedCmd;
     }
 
-    if (trimmedCmd.back() == '&') {
-        parsedCmd.inBackground = true;
-        trimmedCmd.pop_back();  
-        trimmedCmd = trim(trimmedCmd); 
-    } else {
-        parsedCmd.inBackground = false;
-    }
-
-    // PIPING
-    size_t pipePos = trimmedCmd.find('|');
-    if (pipePos != string::npos) {
-        parsedCmd.isPiping = true;
-        parsedCmd.command1 = trimmedCmd.substr(0, pipePos);
-        parsedCmd.command2 = trimmedCmd.substr(pipePos + 1);
-    } else {
-        parsedCmd.isPiping = false;
-    }
-
-    // AND
+    // Parse for "&&" and "||" first
     size_t andPos = trimmedCmd.find("&&");
-    
-    if (andPos != string::npos) {
+    size_t orPos = trimmedCmd.find("||");
+
+    if (andPos != string::npos && (orPos == string::npos)) {
+        // Found "&&" and it's the first logical operator
         parsedCmd.isAnd = true;
         parsedCmd.command1 = trimmedCmd.substr(0, andPos);
         parsedCmd.command2 = trimmedCmd.substr(andPos + 2);
-    } else {
-        parsedCmd.isAnd = false;
-    }
-    
-    // OR
-    size_t orPos = trimmedCmd.find("||");
-    if (orPos != string::npos) {
+    } else if (orPos != string::npos) {
+        // Found "||" and it's either the only logical operator or comes before "&&"
         parsedCmd.isOr = true;
         parsedCmd.command1 = trimmedCmd.substr(0, orPos);
         parsedCmd.command2 = trimmedCmd.substr(orPos + 2);
     } else {
-        parsedCmd.isOr = false;
-    }
-
-    if (parsedCmd.isOr + parsedCmd.isAnd + parsedCmd.isPiping == 0){
-        parsedCmd.command1 = trimmedCmd; 
+        // No "&&" or "||", check for piping "|"
+        size_t pipePos = trimmedCmd.find('|');
+        if (pipePos != string::npos) {
+            parsedCmd.isPiping = true;
+            parsedCmd.command1 = trimmedCmd.substr(0, pipePos);
+            parsedCmd.command2 = trimmedCmd.substr(pipePos + 1);
+        } else {
+            parsedCmd.isPiping = false;
+            parsedCmd.command1 = trimmedCmd;
+        }
     }
 
     parsedCmd.command1 = trim(parsedCmd.command1);
@@ -71,8 +56,8 @@ ParsedCommand Command::parse(const string& command){
         parsedCmd.args2 = getArgsVector(parsedCmd.command2);
     }
 
-    if (parsedCmd.isOr + parsedCmd.isAnd + parsedCmd.isPiping > 1){
-        displayUsage(); 
+    if (parsedCmd.isOr + parsedCmd.isAnd + parsedCmd.isPiping > 1) {
+        displayUsage();
     }
 
     return parsedCmd;
@@ -134,8 +119,9 @@ vector<char*> Command::getArgsVector(const string& command){
 }
 
 void Command::debug(const ParsedCommand& parsedCmd) {
-    cout << "Parsed Command Debug Info:" << std::endl;
-    cout << "In Background: " << parsedCmd.inBackground << endl;
+    cout << "------------------------\n";
+    cout << "Parsed Command Debug Info:\n";
+    cout << "Is Empty: " << parsedCmd.isEmpty << endl; 
     cout << "Is Piping: " << parsedCmd.isPiping << endl;
     cout << "Is AND (&&): " << parsedCmd.isAnd << endl;
     cout << "Is OR (||): " << parsedCmd.isOr << endl;
@@ -160,6 +146,7 @@ void Command::debug(const ParsedCommand& parsedCmd) {
         }
         cout << endl;
     }
+    cout << "------------------------\n";
 }
 
 void Command::displayUsage(){
@@ -168,5 +155,4 @@ void Command::displayUsage(){
     cout << "<command> [OPTIONS] | <command> [OPTIONS]\n"; 
     cout << "<command> [OPTIONS] || <command> [OPTIONS]\n"; 
     cout << "<command> [OPTIONS] && <command> [OPTIONS]\n"; 
-    cout << "To run in background, append \"&\" at the end\n";
 }
