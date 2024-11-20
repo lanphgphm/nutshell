@@ -31,6 +31,7 @@ cd nutshell
 
 3. Compile source code & run app
 ```bash 
+mkdir -p build 
 cd build
 cmake .. && cmake --build . && ./appnutshell 
 ```
