@@ -16,6 +16,8 @@ Currently supports up to 2 chaining commands.
 - GCC 14.1.1 
 - CMake >= 3.16
 
+If you are running on MacOS then install GCC-14 via brew.
+
 ### Recommended 
 - The recommended editor is Visual Studio Code or QtCreator 
 
@@ -34,7 +36,10 @@ cd nutshell
 cd build
 cmake .. && cmake --build . && ./appnutshell 
 ```
-
+If you are a MacOS user, then run:
+```bash
+cmake -DCMAKE_C_COMPILER=/usr/local/bin/gcc-14 -DCMAKE_CXX_COMPILER=/usr/local/bin/g++-14 .. && cmake --build . && ./appnutshell
+```
 ## User Installation
 Not ready to be shipped to end-user.
 

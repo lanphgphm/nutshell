@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMKE_CXX_FLAGS} -stdlib=libstdc++")
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    set(CMAKE_CXX_FLAGS "${CMKE_CXX_FLAGS} -stdlib=libstdc++")
+endif()
 project(nutshell VERSION 0.1 LANGUAGES CXX)
 
 
