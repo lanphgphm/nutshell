@@ -24,10 +24,11 @@ void Executor::execute(const ParsedCommand& cmd){
             ::_exit(EXIT_FAILURE); 
         } else if (rc == 0){
             ::execve(cmd.executable1.c_str(), cmd.args1.data(), environ); 
-            perror(cmd.command1.c_str()); 
+            printError(cmd.command1, errno); 
             ::_exit(EXIT_FAILURE); 
         }
-        waitpid(rc, &this->statCmd1, 0);   
+        waitpid(rc, &this->statCmd1, 0);
+        printError(cmd.command1, this->statCmd1);   
     }
 }
 
@@ -57,7 +58,7 @@ void Executor::executePiped(const ParsedCommand& cmd, int& statCmd1, int& statCm
         ::_exit(EXIT_FAILURE); 
     } else if (rc1 == 0){
         ::execve(cmd.executable1.c_str(), cmd.args1.data(), environ); 
-        perror(cmd.command1.c_str());
+        printError(cmd.command1, errno);
         ::_exit(EXIT_FAILURE); 
     }
 
@@ -76,7 +77,7 @@ void Executor::executePiped(const ParsedCommand& cmd, int& statCmd1, int& statCm
     int rc2 = ::fork(); 
     if (rc2 < 0){
         errMsg = "fork: " + cmd.command2; 
-        perror(errMsg.c_str()); 
+        printError(cmd.command2, errno); 
         ::_exit(EXIT_FAILURE); 
     } else if (rc2 == 0){
         ::execve(cmd.executable2.c_str(), cmd.args2.data(), environ); 
@@ -88,8 +89,10 @@ void Executor::executePiped(const ParsedCommand& cmd, int& statCmd1, int& statCm
     ::dup2(stdin_bk, STDIN_FILENO); 
     ::close(stdin_bk); 
 
-    ::waitpid(rc1, &statCmd1, 0); 
+    ::waitpid(rc1, &statCmd1, 0);
+    printError(cmd.command1, statCmd1); 
     ::waitpid(rc2, &statCmd2, 0);
+    printError(cmd.command2, statCmd2);
 }
 
 void Executor::executeAndOr(const ParsedCommand& cmd, int& statCmd1, int& statCmd2){
@@ -105,11 +108,12 @@ void Executor::executeAndOr(const ParsedCommand& cmd, int& statCmd1, int& statCm
         ::_exit(EXIT_FAILURE); 
     } else if (rc1 == 0){
         ::execve(cmd.executable1.c_str(), cmd.args1.data(), environ); 
-        perror(cmd.command1.c_str()); 
+        printError(cmd.command1, errno); 
         ::_exit(EXIT_FAILURE); 
     }
 
     waitpid(rc1, &statCmd1, 0);
+    printError(cmd.command1, statCmd1);
     exitNormal = WIFEXITED(this->statCmd1); 
     exitStatus = WEXITSTATUS(this->statCmd1); 
 
@@ -129,10 +133,11 @@ void Executor::executeAndOr(const ParsedCommand& cmd, int& statCmd1, int& statCm
             ::_exit(EXIT_FAILURE); 
         } else if (rc2 == 0){
             ::execve(cmd.executable2.c_str(), cmd.args2.data(), environ); 
-            perror(cmd.command2.c_str()); 
+            printError(cmd.command2, errno);  
             ::_exit(EXIT_FAILURE); 
         }
         waitpid(rc2, &statCmd2, 0); 
+        printError(cmd.command2, statCmd2);
     }
 }
 
@@ -144,4 +149,34 @@ void Executor::debug(){
     cout << "------------------------\n";
 }
 
-void Executor::printError(){}
+void Executor::printError(const std::string& cmd, int status) {
+    std::cerr << "Error executing command: " << cmd << std::endl;
+
+    if (WIFSIGNALED(status)) {
+        int signal = WTERMSIG(status);
+        std::cerr << "Terminated by signal: " << signal << " (" << strsignal(signal) << ")" << std::endl;
+        switch (signal) {
+            case SIGSEGV:
+                std::cerr << "Segmentation fault: Invalid memory access." << std::endl;
+                break;
+            case SIGABRT:
+                std::cerr << "Aborted: The process was aborted, possibly due to an assertion failure." << std::endl;
+                break;
+            case SIGFPE:
+                std::cerr << "Floating-point exception: Division by zero or similar error." << std::endl;
+                break;
+            default:
+                std::cerr << "Signal received: " << strsignal(signal) << std::endl;
+                break;
+        }
+    } else if (WIFEXITED(status)) {
+        int exitStatus = WEXITSTATUS(status);
+        std::cerr << "Exited with status: " << exitStatus << std::endl;
+        if (exitStatus != 0) {
+            std::cerr << "Suggestion: Check the command's syntax and ensure all dependencies are available." << std::endl;
+        }
+    } else {
+        std::cerr << "Unknown error occurred." << std::endl;
+    }
+}
+

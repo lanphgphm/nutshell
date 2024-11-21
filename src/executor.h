@@ -27,7 +27,7 @@ public:
 private: 
     void executePiped(const ParsedCommand& cmd, int& statCmd1, int& statCmd2); 
     void executeAndOr(const ParsedCommand& cmd, int& statCmd1, int& statCmd2); 
-    void printError(); // change me 
+    void printError(const std::string& cmd, int status);
 }; 
 
 #endif //EXECUTOR_H
