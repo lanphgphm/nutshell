@@ -184,16 +184,16 @@ void Executor::printError(int status, const std::string& command) {
                 usefulSignalMessage = "Segmentation Fault. Your process is going to kernel's jail.";
                 break;
             case SIGFPE:
-                usefulSignalMessage = "Floating-point exception (e.g., divide by zero): Math is pain.";
+                usefulSignalMessage = "Floating-point exception (e.g., divide by zero)";
                 break;
             case SIGABRT:
                 usefulSignalMessage = "Aborted";
                 break;
             case SIGILL:
-                usefulSignalMessage = "Illegal instruction: Wanna go to jail with me?";
+                usefulSignalMessage = "Illegal instruction.";
                 break;
             case SIGBUS:
-                usefulSignalMessage = "Bus error: You boarded the wrong bus, and now you're stranded in debug land.";
+                usefulSignalMessage = "Bus error.";
                 break;
             case SIGKILL:
                 usefulSignalMessage = "Killed";
