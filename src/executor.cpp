@@ -41,6 +41,8 @@ void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
             if (WIFSTOPPED(status)) {
                 addStoppedJob(childPID);
                 std::cout << "[" << stoppedJobs.size() << "]+ Stopped process " << childPID << "\n";
+            } else {
+                printError(status, cmd.command1); // print error for sjngle command
             }
 
             childPID = -1;
@@ -106,12 +108,15 @@ void Executor::executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCm
     ::close(stdin_bk);
 
     ::waitpid(rc1, &statCmd1, 0);
+    printError(statCmd1, cmd.command1);
+
     ::waitpid(rc2, &statCmd2, 0);
+    printError(statCmd2, cmd.command2);
 }
 
 void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2) {
     string errMsg;
-    bool rickAstley = false; // true to continue
+    bool shouldExecuteNext = false; // true to continue
     bool exitNormal;
     int exitStatus;
 
@@ -127,18 +132,19 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
     }
 
     waitpid(rc1, &statCmd1, 0);
+    printError(statCmd1, cmd.command1);
     exitNormal = WIFEXITED(this->statCmd1);
     exitStatus = WEXITSTATUS(this->statCmd1);
 
     if (cmd.isAnd) {
         if (exitNormal && (exitStatus == 0))
-            rickAstley = true;
+            shouldExecuteNext = true;
     } else if (cmd.isOr) {
         if (exitNormal && (exitStatus != 0))
-            rickAstley = true;
+            shouldExecuteNext = true;
     }
 
-    if (rickAstley) {
+    if (shouldExecuteNext) {
         int rc2 = ::fork();
         if (rc2 < 0) {
             errMsg = "fork: " + cmd.command2;
@@ -150,6 +156,7 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
             ::_exit(EXIT_FAILURE);
         }
         waitpid(rc2, &statCmd2, 0);
+        printError(statCmd1, cmd.command2);
     }
 }
 
@@ -161,7 +168,47 @@ void Executor::debug() {
     cout << "------------------------\n";
 }
 
-void Executor::printError() {}
+void Executor::printError(int status, const std::string& command) {
+    // check if th process exited normally
+    if (WIFEXITED(status)){
+        int exitCode = WEXITSTATUS(status);
+        if (exitCode != 0){
+            std::cerr << "Error: Command '" << command << "' failed with exit code " << exitCode << "\n";
+        }
+    }
+    else if (WIFSIGNALED(status)){
+        int signalNumber = WTERMSIG(status);
+        std::string usefulSignalMessage;
+        switch (signalNumber){
+            case SIGSEGV:
+                usefulSignalMessage = "Segmentation Fault. Your process is going to kernel's jail.";
+                break;
+            case SIGFPE:
+                usefulSignalMessage = "Floating-point exception (e.g., divide by zero): Math is pain.";
+                break;
+            case SIGABRT:
+                usefulSignalMessage = "Aborted";
+                break;
+            case SIGILL:
+                usefulSignalMessage = "Illegal instruction: Wanna go to jail with me?";
+                break;
+            case SIGBUS:
+                usefulSignalMessage = "Bus error: You boarded the wrong bus, and now you're stranded in debug land.";
+                break;
+            case SIGKILL:
+                usefulSignalMessage = "Killed";
+                break;
+            case SIGTERM:
+                usefulSignalMessage = "Terminated: Your process has been asked to leave the house.";
+                break;
+            default:
+                usefulSignalMessage = "Unknown signal (" + std::to_string(signalNumber) + ")";
+                break;
+        }
+        std::cerr << "Error: Command '" << command << "' terminated by signal: " << usefulSignalMessage << " (Signal " << signalNumber << ")\n";
+        
+    }
+}
 
 void Executor::addStoppedJob(pid_t pid) { stoppedJobs.push_back(pid); }
 

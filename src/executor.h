@@ -12,6 +12,8 @@
 #include <sys/wait.h>  // waitpid
 #include <unistd.h> // fork, read, write, exec, dup, access, dup2, close, 3 fds
 #include <vector>   // vector
+#include <signal.h>
+#include <map>
 
 #include "command.h"
 
@@ -20,7 +22,7 @@ class Executor {
     Executor();
     ~Executor();
 
-    int statCmd1, statCmd2 = 69; // sometimes statCmd2 unused :)
+    int statCmd1, statCmd2 = 0; // sometimes statCmd2 unused :)
 
     void execute(const ParsedCommand &cmd, pid_t &child_pid);
     void debug();
@@ -34,7 +36,7 @@ class Executor {
   private:
     void executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2);
     void executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2);
-    void printError(); // change me
+    void printError(int status, const std::string& command);
 
     std::vector<pid_t> stoppedJobs;
 };
