@@ -1,5 +1,5 @@
 #include "executor.h"
-#include "signal.h"
+#include "signals.h"
 
 using namespace std;
 
@@ -170,7 +170,7 @@ void Executor::debug() {
 }
 
 void Executor::printError(int status, const string& command) {
-    // check if th process exited normally
+    // check if the process exited normally
     if (WIFEXITED(status)){
         int exitCode = WEXITSTATUS(status);
         if (exitCode != 0){
@@ -183,7 +183,7 @@ void Executor::printError(int status, const string& command) {
         auto it = signalMessages.find(signalNumber);
         string usefulSignalMessage = (it != signalMessages.end()) ? it->second : "Unknown signal (" + to_string(signalNumber) + ")";
 
-        cerr << "Errors: Command '" << command << "' terminated by signal: " << usefulSignalMessage << " (Signal " << signalNumber << ")\n";
+        cerr << "Error: Command '" << command << "' terminated by signal: " << usefulSignalMessage << " (Signal " << signalNumber << ")\n";
     }
 }
 
