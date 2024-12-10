@@ -8,9 +8,20 @@ Executor::Executor() {}
 
 Executor::~Executor() {}
 
+const std::unordered_map<int, std::string> Executor::signalMessages = {
+    {SIGINT, "Interrup Signal."},
+    {SIGSEGV, "Segmentation Fault. Your process is going to kernel's jail."},
+    {SIGFPE, "Floating-point exception (e.g., divide by zero)"},
+    {SIGABRT, "Aborted"},
+    {SIGILL, "Illegal instruction."},
+    {SIGKILL, "Killed"},
+    {SIGTERM, "Terminated: Your process has been asked to leave the house."},
+    {SIGQUIT, "Quit. The user requested program termination."},
+};
+
 void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
     if (cmd.isAnd + cmd.isOr + cmd.isPiping > 1) {
-        std::cerr << "Error: Too many operators\n";
+        cerr << "Error: Too many operators\n";
         return;
     }
 
@@ -40,7 +51,9 @@ void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
 
             if (WIFSTOPPED(status)) {
                 addStoppedJob(childPID);
-                std::cout << "[" << stoppedJobs.size() << "]+ Stopped process " << childPID << "\n";
+                cout << "[" << stoppedJobs.size() << "]+ Stopped process " << childPID << "\n";
+            } else {
+                printError(status, cmd.command1); // print error for sjngle command
             }
 
             childPID = -1;
@@ -106,12 +119,15 @@ void Executor::executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCm
     ::close(stdin_bk);
 
     ::waitpid(rc1, &statCmd1, 0);
+    printError(statCmd1, cmd.command1);
+
     ::waitpid(rc2, &statCmd2, 0);
+    printError(statCmd2, cmd.command2);
 }
 
 void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2) {
     string errMsg;
-    bool rickAstley = false; // true to continue
+    bool shouldExecuteNext = false; // true to continue
     bool exitNormal;
     int exitStatus;
 
@@ -127,18 +143,19 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
     }
 
     waitpid(rc1, &statCmd1, 0);
+    printError(statCmd1, cmd.command1);
     exitNormal = WIFEXITED(this->statCmd1);
     exitStatus = WEXITSTATUS(this->statCmd1);
 
     if (cmd.isAnd) {
         if (exitNormal && (exitStatus == 0))
-            rickAstley = true;
+            shouldExecuteNext = true;
     } else if (cmd.isOr) {
         if (exitNormal && (exitStatus != 0))
-            rickAstley = true;
+            shouldExecuteNext = true;
     }
 
-    if (rickAstley) {
+    if (shouldExecuteNext) {
         int rc2 = ::fork();
         if (rc2 < 0) {
             errMsg = "fork: " + cmd.command2;
@@ -150,6 +167,7 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
             ::_exit(EXIT_FAILURE);
         }
         waitpid(rc2, &statCmd2, 0);
+        printError(statCmd2, cmd.command2);
     }
 }
 
@@ -161,7 +179,23 @@ void Executor::debug() {
     cout << "------------------------\n";
 }
 
-void Executor::printError() {}
+void Executor::printError(int status, const string& command) {
+    // check if the process exited normally
+    if (WIFEXITED(status)){
+        int exitCode = WEXITSTATUS(status);
+        if (exitCode != 0){
+            cerr << "Error: Command '" << command << "' failed with exit code " << exitCode << "\n";
+        }
+    }
+    else if (WIFSIGNALED(status)) {
+        int signalNumber = WTERMSIG(status);
+        
+        auto it = signalMessages.find(signalNumber);
+        string usefulSignalMessage = (it != signalMessages.end()) ? it->second : "Unknown signal (" + to_string(signalNumber) + ")";
+
+        cerr << "Error: Command '" << command << "' terminated by signal: " << usefulSignalMessage << " (Signal " << signalNumber << ")\n";
+    }
+}
 
 void Executor::addStoppedJob(pid_t pid) { stoppedJobs.push_back(pid); }
 
@@ -173,7 +207,7 @@ pid_t Executor::getLastStoppedJob() {
 }
 
 void Executor::removeStoppedJob(pid_t pid) {
-    stoppedJobs.erase(std::remove(stoppedJobs.begin(), stoppedJobs.end(), pid), stoppedJobs.end());
+    stoppedJobs.erase(remove(stoppedJobs.begin(), stoppedJobs.end(), pid), stoppedJobs.end());
 }
 
 int Executor::getStoppedJobsSize() { return stoppedJobs.size(); }
