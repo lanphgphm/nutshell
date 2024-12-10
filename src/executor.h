@@ -14,7 +14,8 @@
 #include <vector>   // vector
 #include <signal.h>
 #include <map>
-
+#include <unordered_map>
+#include <string>
 #include "command.h"
 
 class Executor {
@@ -37,6 +38,7 @@ class Executor {
     void executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2);
     void executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2);
     void printError(int status, const std::string& command);
+    static const std::unordered_map<int, std::string> signalMessages;
 
     std::vector<pid_t> stoppedJobs;
 };

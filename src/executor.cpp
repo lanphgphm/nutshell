@@ -1,5 +1,4 @@
 #include "executor.h"
-#include "signals.h"
 
 using namespace std;
 
@@ -8,6 +7,17 @@ extern char **environ;
 Executor::Executor() {}
 
 Executor::~Executor() {}
+
+const std::unordered_map<int, std::string> Executor::signalMessages = {
+    {SIGINT, "Interrup Signal."},
+    {SIGSEGV, "Segmentation Fault. Your process is going to kernel's jail."},
+    {SIGFPE, "Floating-point exception (e.g., divide by zero)"},
+    {SIGABRT, "Aborted"},
+    {SIGILL, "Illegal instruction."},
+    {SIGKILL, "Killed"},
+    {SIGTERM, "Terminated: Your process has been asked to leave the house."},
+    {SIGQUIT, "Quit. The user requested program termination."},
+};
 
 void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
     if (cmd.isAnd + cmd.isOr + cmd.isPiping > 1) {
