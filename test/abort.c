@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <cstdlib>
+#include <stdlib.h>
 
 int main() {
     printf("Test: Triggering SIGABRT (Abort)\n");
