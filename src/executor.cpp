@@ -1,4 +1,5 @@
 #include "executor.h"
+#include "signal.h"
 
 using namespace std;
 
@@ -10,7 +11,7 @@ Executor::~Executor() {}
 
 void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
     if (cmd.isAnd + cmd.isOr + cmd.isPiping > 1) {
-        std::cerr << "Error: Too many operators\n";
+        cerr << "Error: Too many operators\n";
         return;
     }
 
@@ -40,7 +41,7 @@ void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
 
             if (WIFSTOPPED(status)) {
                 addStoppedJob(childPID);
-                std::cout << "[" << stoppedJobs.size() << "]+ Stopped process " << childPID << "\n";
+                cout << "[" << stoppedJobs.size() << "]+ Stopped process " << childPID << "\n";
             } else {
                 printError(status, cmd.command1); // print error for sjngle command
             }
@@ -156,7 +157,7 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
             ::_exit(EXIT_FAILURE);
         }
         waitpid(rc2, &statCmd2, 0);
-        printError(statCmd1, cmd.command2);
+        printError(statCmd2, cmd.command2);
     }
 }
 
@@ -168,45 +169,21 @@ void Executor::debug() {
     cout << "------------------------\n";
 }
 
-void Executor::printError(int status, const std::string& command) {
+void Executor::printError(int status, const string& command) {
     // check if th process exited normally
     if (WIFEXITED(status)){
         int exitCode = WEXITSTATUS(status);
         if (exitCode != 0){
-            std::cerr << "Error: Command '" << command << "' failed with exit code " << exitCode << "\n";
+            cerr << "Error: Command '" << command << "' failed with exit code " << exitCode << "\n";
         }
     }
-    else if (WIFSIGNALED(status)){
+    else if (WIFSIGNALED(status)) {
         int signalNumber = WTERMSIG(status);
-        std::string usefulSignalMessage;
-        switch (signalNumber){
-            case SIGSEGV:
-                usefulSignalMessage = "Segmentation Fault. Your process is going to kernel's jail.";
-                break;
-            case SIGFPE:
-                usefulSignalMessage = "Floating-point exception (e.g., divide by zero)";
-                break;
-            case SIGABRT:
-                usefulSignalMessage = "Aborted";
-                break;
-            case SIGILL:
-                usefulSignalMessage = "Illegal instruction.";
-                break;
-            case SIGBUS:
-                usefulSignalMessage = "Bus error.";
-                break;
-            case SIGKILL:
-                usefulSignalMessage = "Killed";
-                break;
-            case SIGTERM:
-                usefulSignalMessage = "Terminated: Your process has been asked to leave the house.";
-                break;
-            default:
-                usefulSignalMessage = "Unknown signal (" + std::to_string(signalNumber) + ")";
-                break;
-        }
-        std::cerr << "Error: Command '" << command << "' terminated by signal: " << usefulSignalMessage << " (Signal " << signalNumber << ")\n";
         
+        auto it = signalMessages.find(signalNumber);
+        string usefulSignalMessage = (it != signalMessages.end()) ? it->second : "Unknown signal (" + to_string(signalNumber) + ")";
+
+        cerr << "Errors: Command '" << command << "' terminated by signal: " << usefulSignalMessage << " (Signal " << signalNumber << ")\n";
     }
 }
 
@@ -220,7 +197,7 @@ pid_t Executor::getLastStoppedJob() {
 }
 
 void Executor::removeStoppedJob(pid_t pid) {
-    stoppedJobs.erase(std::remove(stoppedJobs.begin(), stoppedJobs.end(), pid), stoppedJobs.end());
+    stoppedJobs.erase(remove(stoppedJobs.begin(), stoppedJobs.end(), pid), stoppedJobs.end());
 }
 
 int Executor::getStoppedJobsSize() { return stoppedJobs.size(); }
