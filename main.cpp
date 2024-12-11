@@ -46,7 +46,7 @@ int main() {
         if (cmd.compare("exit") == 0)
             break;
 
-        if (cmd.compare("steve-jobs") == 0) {
+        if (cmd.compare("steve") == 0) {
             if (executor.getStoppedJobsSize() > 0) {
 
                 std::vector<pid_t> stoppedJobs = executor.getStoppedJob();
