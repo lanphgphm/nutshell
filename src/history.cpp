@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-History::History() : historyIndex(-1), historyFilePath(".my_shell_history") {}
+History::History() : historyIndex(-1), historyFilePath(".nutshell_history") {}
 
 History::~History() {}
 
@@ -79,7 +79,11 @@ std::string History::getHistoryCommand(bool up) {
 }
 
 void History::updateCommandLine(const std::string &prompt, const std::string &command) {
-    std::cout << "\33[2K\r" << prompt << command << std::flush; // Clear line, move to start, and print
+    std::cout << "\33[2K\r" << prompt << command << '\n' << std::flush; // Clear line, move to start, and print
+}
+
+void History::resetHistoryIterator() {
+    historyIndex = history.size();
 }
 
 bool History::readArrowKey(std::string &key) {

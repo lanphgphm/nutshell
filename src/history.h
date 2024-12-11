@@ -21,7 +21,8 @@ public:
     bool fileExists(const std::string &filePath) const; 
 
     void updateCommandLine(const std::string &prompt, const std::string &command); 
-    bool readArrowKey(std::string &key);     
+    bool readArrowKey(std::string &key);   
+    void resetHistoryIterator();  
 
 private:
     std::vector<std::string> history;        

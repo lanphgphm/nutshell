@@ -36,13 +36,13 @@ void handleSignal(int signal) {
 std::string readCommandLine(const std::string &prompt, History &history) {
     std::string cmd;
     char c;
+    const int BACKSPACE = 127;
 
     while (true) {
         if (read(STDIN_FILENO, &c, 1) == 1) {
             if (c == '\n') {
-                std::cout << "\n";
                 break;
-            } else if (c == 127 || c == '\b') {
+            } else if (c == BACKSPACE || c == '\b') {
                 if (!cmd.empty()) {
                     cmd.pop_back();
                     history.updateCommandLine(prompt, cmd);
@@ -96,6 +96,7 @@ int main() {
         if (!parsedCmd.isEmpty) {
             executor.execute(parsedCmd, childPID);
             history.saveHistory();
+            history.resetHistoryIterator();
         }
     }
     return 0;
