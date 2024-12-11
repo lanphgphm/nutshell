@@ -7,6 +7,8 @@
 #include <csignal>
 #include <iostream>
 #include <string>
+#include <sys/types.h>
+#include <termios.h>
 #include <unistd.h>
 
 using namespace std;
@@ -17,25 +19,29 @@ void handleSignal(int signal) {
     if (childPID > 0) {
         switch (signal) {
         case SIGINT:
-            cout << "\n";
+            cout << "\nCTRL+C pressed\n";
             kill(childPID, signal);
             break;
         case SIGTSTP:
-            cout << "\n";
+            cout << "\nCTRL+Z pressed\n";
             kill(childPID, signal);
             break;
         default:
+            cout << "\nSignal not implemented: " << signal << "\n";
             break;
         }
     }
 }
 
+
 int main() {
-    signal(SIGINT, handleSignal);
-    signal(SIGTSTP, handleSignal);
 
     Command commandParser;
     Executor executor;
+
+    signal(SIGINT, handleSignal);
+    signal(SIGTSTP, handleSignal);
+
 
     while (true) {
         cout << "nutshell> ";
