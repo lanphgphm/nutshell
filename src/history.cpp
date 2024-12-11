@@ -101,7 +101,6 @@ bool History::readArrowKey(std::string &key) {
             }
         }
     }
-
     key = ""; // Clear the key for non-arrow inputs
     return false;
 }
