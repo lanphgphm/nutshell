@@ -25,7 +25,8 @@ class Executor {
 
     int statCmd1, statCmd2 = 0; // sometimes statCmd2 unused :)
 
-    void execute(const ParsedCommand &cmd, pid_t &child_pid,int shell_terminal, pid_t &nutshell_pgid);
+    void execute(const ParsedCommand &cmd, pid_t &child_pid, int shell_terminal, pid_t &nutshell_pgid);
+    void executeSingle(std::string cmd, std::string executable1, std::vector<char *> args, pid_t &childPID);
     void debug();
 
     // for handling stopped jobs (SIGTSTP)
@@ -35,8 +36,10 @@ class Executor {
     int getStoppedJobsSize();
 
   private:
-    void executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &child_pid,int shell_terminal, pid_t &nutshell_pgid);
-    void executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &child_pid,int shell_terminal, pid_t &nutshell_pgid);
+    void executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &child_pid, int shell_terminal,
+                      pid_t &nutshell_pgid);
+    void executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &child_pid, int shell_terminal,
+                      pid_t &nutshell_pgid);
     void printError(int status, const std::string &command);
     static const std::unordered_map<int, std::string> signalMessages;
 

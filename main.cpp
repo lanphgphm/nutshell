@@ -32,7 +32,7 @@ void handleSignal(int signal) {
             kill(childPID, signal);
             break;
         default:
-        cout << "Signal not implemented: " << signal << "\n";
+            cout << "Signal not implemented: " << signal << "\n";
             break;
         }
     }
@@ -52,10 +52,10 @@ void init_shell() {
         /* Ignore interactive and job-control signals.  */
         signal(SIGINT, handleSignal);
         signal(SIGTSTP, handleSignal);
-        signal(SIGQUIT, handleSignal);
-        signal(SIGTTIN, handleSignal);
-        signal(SIGTTOU, handleSignal);
-        signal(SIGCHLD, handleSignal);
+        signal(SIGQUIT, SIG_IGN);
+        signal(SIGTTIN, SIG_IGN);
+        signal(SIGTTOU, SIG_IGN);
+        signal(SIGCHLD, SIG_IGN);
 
         /* Put ourselves in our own process group.  */
         nutshell_pgid = getpid();
