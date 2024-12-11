@@ -72,13 +72,14 @@ std::string readCommandLine(const std::string &prompt, History &history) {
 }
 
 
-
-
 int main() {
 
     Command commandParser;
     Executor executor;
     History history;
+
+    signal(SIGINT, handleSignal);
+    signal(SIGTSTP, handleSignal);
 
     history.loadHistory();
 
@@ -92,6 +93,25 @@ int main() {
         if (cmd == "exit") break;  // Exit the shell
 
         history.addToHistory(cmd);
+
+        if (cmd.compare("steve") == 0) {
+            if (executor.getStoppedJobsSize() > 0) {
+
+                std::vector<pid_t> stoppedJobs = executor.getStoppedJob();
+                for (int i = 0; i < stoppedJobs.size(); i++) {
+                    if (i == stoppedJobs.size() - 1) {
+                        cout << "[" << i + 1 << "]+ Stopped process " << stoppedJobs[i] << "\n";
+                        break;
+                    } else {
+                        cout << "[" << i + 1 << "]- Stopped process " << stoppedJobs[i] << "\n";
+                    }
+                }
+            } else {
+                cout << "No stopped jobs\n";
+            }
+
+            continue;
+        }
 
         ParsedCommand parsedCmd = commandParser.parse(cmd);
         if (!parsedCmd.isEmpty) {
