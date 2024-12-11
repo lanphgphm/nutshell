@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <string>
 #include "command.h"
+#include "history.h"
 
 class Executor {
   public:
