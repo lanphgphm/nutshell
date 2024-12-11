@@ -2,6 +2,8 @@
 #define EXECUTOR_H
 
 #include "command.h"
+#include "history.h"
+
 #include <algorithm> // find_if
 #include <cctype>    // isspace
 #include <cstdlib>   // getenv
@@ -17,8 +19,7 @@
 #include <unistd.h>    // fork, read, write, exec, dup, access, dup2, close, 3 fds
 #include <unordered_map>
 #include <string>
-#include "command.h"
-#include "history.h"
+
 
 class Executor {
   public:

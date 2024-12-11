@@ -1,7 +1,3 @@
-// responsible for: handling interrupt signals, setting envvars, changing
-// prompts between users the important signals: SIGINT, SIGSTP, SIGCHLD,
-// SIGTERM, SIGKILL
-
 #include "src/command.h"
 #include "src/executor.h"
 #include "src/history.h"
