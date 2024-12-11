@@ -111,7 +111,9 @@ vector<char*> Command::getArgsVector(const string& command){
 
     vector<char*> args; 
     for (auto& t: tokens) {
-        args.push_back(&t[0]); 
+        char* arg = new char[t.size() + 1];
+        strcpy(arg, t.c_str());
+        args.push_back(arg);
     }
     args.push_back(nullptr); 
 

@@ -13,7 +13,7 @@
 #include<algorithm> // find_if
 #include<cctype> // isspace
 #include<assert.h> // assert
-#include<history.h>
+#include<cstring> // strcpy
 
 struct ParsedCommand{
     bool isEmpty = false; 
