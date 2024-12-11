@@ -16,7 +16,9 @@
 #include <sys/wait.h>  // waitpid
 #include <unistd.h>    // fork, read, write, exec, dup, access, dup2, close, 3 fds
 #include <unordered_map>
-#include <vector> // vector
+#include <string>
+#include "command.h"
+#include "history.h"
 
 class Executor {
   public:

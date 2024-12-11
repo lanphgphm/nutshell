@@ -17,6 +17,7 @@ add_executable(appnutshell
     "main.cpp"
     "src/command.h" "src/command.cpp" 
     "src/executor.h" "src/executor.cpp"
+    "src/history.h" "src/history.cpp"
 )
 
 include(GNUInstallDirs)
