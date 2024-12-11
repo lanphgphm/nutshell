@@ -19,22 +19,22 @@ const std::unordered_map<int, std::string> Executor::signalMessages = {
     {SIGQUIT, "Quit. The user requested program termination."},
 };
 
-void Executor::execute(const ParsedCommand &cmd, pid_t &childPID, int shell_terminal, pid_t &nutshell_pgid) {
+void Executor::execute(const ParsedCommand &cmd, pid_t &childPID) {
     if (cmd.isAnd + cmd.isOr + cmd.isPiping > 1) {
         cerr << "Error: Too many operators\n";
         return;
     }
 
     if (cmd.isPiping) {
-        executePiped(cmd, this->statCmd1, this->statCmd2, childPID, shell_terminal, nutshell_pgid);
+        executePiped(cmd, this->statCmd1, this->statCmd2, childPID);
     } else if (cmd.isAnd || cmd.isOr) {
-        executeAndOr(cmd, this->statCmd1, this->statCmd2, childPID, shell_terminal, nutshell_pgid);
+        executeAndOr(cmd, this->statCmd1, this->statCmd2, childPID);
     } else { // single command
-        executeSingle(cmd.command1, cmd.executable1, cmd.args1, childPID);
+        executeSingle(cmd.command1, cmd.executable1, cmd.args1, childPID, this->statCmd1);
     }
 }
 
-void Executor::executeSingle(std::string cmd, std::string exe, std::vector<char *> args, pid_t &childPID) {
+void Executor::executeSingle(std::string cmd, std::string exe, std::vector<char *> args, pid_t &childPID, int &status) {
 
     childPID = ::fork();
     if (childPID < 0) {
@@ -52,7 +52,7 @@ void Executor::executeSingle(std::string cmd, std::string exe, std::vector<char 
         // Parent: Set the child process group and wait
         // setpgid(childPID, childPID);
 
-        int status;
+        // int status;
         waitpid(childPID, &status, WUNTRACED);
 
         if (WIFSTOPPED(status)) {
@@ -66,8 +66,7 @@ void Executor::executeSingle(std::string cmd, std::string exe, std::vector<char 
     }
 }
 
-void Executor::executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &childPID, int shell_terminal,
-                            pid_t &nutshell_pgid) {
+void Executor::executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &childPID) {
     string errMsg;
 
     // backup/save stdin, stdout, stderr
@@ -87,29 +86,9 @@ void Executor::executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCm
     ::dup2(fdPipe[1], STDOUT_FILENO);
     ::close(fdPipe[1]);
 
-    // fork process for first command
-    // int rc1 = ::fork();
-    // if (rc1 < 0) {
-    //     errMsg = "fork: " + cmd.command1;
-    //     perror(errMsg.c_str());
-    //     ::_exit(EXIT_FAILURE);
-    // } else if (rc1 == 0) {
-    //     setpgid(0, 0); // Set process group ID
-    //     // signal(SIGINT, SIG_DFL);  // Reset SIGINT to default
-    //     // signal(SIGTSTP, SIG_DFL); // Reset SIGTSTP to default
+    executeSingle(cmd.command1, cmd.executable1, cmd.args1, childPID, statCmd1);
 
-    //     ::execve(cmd.executable1.c_str(), cmd.args1.data(), environ);
-    //     perror(cmd.command1.c_str());
-    //     ::_exit(EXIT_FAILURE);
-    // } else {
-    //     if (pgid == 0)
-    //         pgid = rc1; // Set the process group ID for the pipeline
-    //     setpgid(rc1, pgid);
-    // }
-
-    executeSingle(cmd.command1, cmd.executable1, cmd.args1, childPID);
-
-    cout << "Process 1: " << childPID << "\n";
+    // cout << "Process 1: " << childPID << "\n";
     // cout << "PGID after command 1: " << pgid << "\n";
 
     // restore STDOUT from backup
@@ -123,110 +102,23 @@ void Executor::executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCm
     ::dup2(fdPipe[0], STDIN_FILENO);
     ::close(fdPipe[0]);
 
-    // fork process for second command
-    // int rc2 = ::fork();
-    // if (rc2 < 0) {
-    //     errMsg = "fork: " + cmd.command2;
-    //     perror(errMsg.c_str());
-    //     ::_exit(EXIT_FAILURE);
-    // } else if (rc2 == 0) {
-    //     setpgid(0, pgid); // Join the process group of the pipeline
-    //     // signal(SIGINT, SIG_DFL);  // Reset SIGINT to default
-    //     // signal(SIGTSTP, SIG_DFL); // Reset SIGTSTP to default
+    executeSingle(cmd.command2, cmd.executable2, cmd.args2, childPID, statCmd2);
 
-    //     ::execve(cmd.executable2.c_str(), cmd.args2.data(), environ);
-    //     perror(cmd.command2.c_str());
-    //     ::_exit(EXIT_FAILURE);
-    // } else {
-    //     setpgid(rc2, pgid);
-    // }
-
-    executeSingle(cmd.command2, cmd.executable2, cmd.args2, childPID);
-
-    cout << "Process 2: " << childPID << "\n";
+    // cout << "Process 2: " << childPID << "\n";
     // cout << "PGID after command 2: " << pgid << "\n";
 
     // restore STDIN from backup
     ::dup2(stdin_bk, STDIN_FILENO);
     ::close(stdin_bk);
-
-    // Track the process group ID
-    // childPID = pgid;
-
-    // Set the job process group ID to the foreground
-    // tcsetpgrp(shell_terminal, pgid);
-
-    // while (true) {
-    //     int status;
-    //     pid_t completedPID = waitpid(-pgid, &status, WUNTRACED);
-    //     cout << "Process 1: " << rc1 << " Process 2: " << rc2 << "\n";
-    //     cout << "Completed PID: " << completedPID << "\n";
-
-    //     if (completedPID == -1) {
-    //         if (errno == ECHILD)
-    //             break; // No more child processes
-    //         continue;
-    //     }
-
-    //     cout << "Status: " << status << "\n";
-    //     // if (WIFSTOPPED(status)) {
-    //     //     // Handle Ctrl+Z (SIGTSTP)
-    //     //     cout << "[" << stoppedJobs.size() + 1 << "]+ Stopped process group " << pgid << "\n";
-    //     //     addStoppedJob(pgid); // Add the entire group as a job
-    //     //     break;
-    //     // }
-
-    //     if (WIFSIGNALED(status)) {
-    //         // Handle Ctrl+C (SIGINT) or other signals
-    //         cout << "Process group " << pgid << " terminated by CTRL+C.\n";
-    //         break;
-    //     }
-
-    //     if (WIFEXITED(status)) {
-    //         // Process exited normally
-    //         if (completedPID == rc1) {
-    //             statCmd1 = status;
-    //         } else if (completedPID == rc2) {
-    //             statCmd2 = status;
-    //         }
-
-    //         // Check if both processes have completed
-    //         if (waitpid(rc1, NULL, WNOHANG) == -1 && waitpid(rc2, NULL, WNOHANG) == -1) {
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // ::waitpid(rc1, &statCmd1, 0);
-    // printError(statCmd1, cmd.command1);
-
-    // ::waitpid(rc2, &statCmd2, 0);
-    // printError(statCmd2, cmd.command2);
-    // tcsetpgrp(shell_terminal, nutshell_pgid);
 }
 
-void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &childPID, int shell_terminal,
-                            pid_t &nutshell_pgid) {
+void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &childPID) {
     string errMsg;
     bool shouldExecuteNext = false; // true to continue
     bool exitNormal;
     int exitStatus;
 
-    int rc1 = ::fork();
-    if (rc1 < 0) {
-        errMsg = "fork: " + cmd.command1;
-        perror(errMsg.c_str());
-        ::_exit(EXIT_FAILURE);
-    } else if (rc1 == 0) {
-        ::execve(cmd.executable1.c_str(), cmd.args1.data(), environ);
-        perror(cmd.command1.c_str());
-        ::_exit(EXIT_FAILURE);
-    }
-
-    waitpid(rc1, &statCmd1, 0);
-    printError(statCmd1, cmd.command1);
-
-    // executeSingle(cmd.command1, cmd.executable1, cmd.args1, childPID, );
+    executeSingle(cmd.command1, cmd.executable1, cmd.args1, childPID, statCmd1);
 
     exitNormal = WIFEXITED(this->statCmd1);
     exitStatus = WEXITSTATUS(this->statCmd1);
@@ -240,18 +132,7 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
     }
 
     if (shouldExecuteNext) {
-        int rc2 = ::fork();
-        if (rc2 < 0) {
-            errMsg = "fork: " + cmd.command2;
-            perror(errMsg.c_str());
-            ::_exit(EXIT_FAILURE);
-        } else if (rc2 == 0) {
-            ::execve(cmd.executable2.c_str(), cmd.args2.data(), environ);
-            perror(cmd.command2.c_str());
-            ::_exit(EXIT_FAILURE);
-        }
-        waitpid(rc2, &statCmd2, 0);
-        printError(statCmd2, cmd.command2);
+        executeSingle(cmd.command2, cmd.executable2, cmd.args2, childPID, statCmd2);
     }
 }
 
