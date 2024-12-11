@@ -44,8 +44,7 @@ std::string readCommandLine(const std::string &prompt, History &history) {
             } else if (c == BACKSPACE || c == '\b') {
                 if (!cmd.empty()) {
                     cmd.pop_back();
-                    history.updateCommandLine(prompt, cmd);
-                }
+                    history.updateCommandLine(prompt, cmd);                }
             } else if (c == '\033') {
                 char seq[2];
                 if (read(STDIN_FILENO, &seq[0], 1) == 1 && read(STDIN_FILENO, &seq[1], 1) == 1) {
@@ -57,6 +56,7 @@ std::string readCommandLine(const std::string &prompt, History &history) {
                             cmd = history.getHistoryCommand(false);
                             history.updateCommandLine(prompt, cmd);
                         }
+                        std::cout << cmd << "\n" << std::flush;
                     }
                 }
             } else {
