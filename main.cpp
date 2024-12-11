@@ -4,12 +4,15 @@
 
 #include "src/command.h"
 #include "src/executor.h"
+#include "src/history.h"
+
 #include <csignal>
 #include <iostream>
 #include <string>
 #include <sys/types.h>
 #include <termios.h>
 #include <unistd.h>
+#include <termios.h>
 
 using namespace std;
 
@@ -33,51 +36,69 @@ void handleSignal(int signal) {
     }
 }
 
+std::string readCommandLine(const std::string &prompt, History &history) {
+    std::string cmd;
+    char c;
+    const int BACKSPACE = 127;
+
+    while (true) {
+        if (read(STDIN_FILENO, &c, 1) == 1) {
+            if (c == '\n') {
+                break;
+            } else if (c == BACKSPACE || c == '\b') {
+                if (!cmd.empty()) {
+                    cmd.pop_back();
+                    history.updateCommandLine(prompt, cmd);
+                }
+            } else if (c == '\033') {
+                char seq[2];
+                if (read(STDIN_FILENO, &seq[0], 1) == 1 && read(STDIN_FILENO, &seq[1], 1) == 1) {
+                    if (seq[0] == '[') {
+                        if (seq[1] == 'A') {
+                            cmd = history.getHistoryCommand(true);
+                            history.updateCommandLine(prompt, cmd);
+                        } else if (seq[1] == 'B') {
+                            cmd = history.getHistoryCommand(false);
+                            history.updateCommandLine(prompt, cmd);
+                        }
+                    }
+                }
+            } else {
+                cmd += c;
+            }
+        }
+    }
+    return cmd;
+}
+
+
+
 
 int main() {
 
     Command commandParser;
     Executor executor;
+    History history;
 
-    signal(SIGINT, handleSignal);
-    signal(SIGTSTP, handleSignal);
+    history.loadHistory();
 
+    const std::string prompt = "nutshell> ";
+    std::string cmd;
 
     while (true) {
-        cout << "nutshell> ";
+        std::cout << prompt << std::flush;
+        cmd = readCommandLine(prompt, history); // Call static method directly
+        if (cmd.empty()) continue; // Ignore empty commands
+        if (cmd == "exit") break;  // Exit the shell
 
-        string cmd;
-        getline(std::cin, cmd);
-
-        if (cmd.compare("exit") == 0)
-            break;
-
-        if (cmd.compare("steve") == 0) {
-            if (executor.getStoppedJobsSize() > 0) {
-
-                std::vector<pid_t> stoppedJobs = executor.getStoppedJob();
-                for (int i = 0; i < stoppedJobs.size(); i++) {
-                    if (i == stoppedJobs.size() - 1) {
-                        cout << "[" << i + 1 << "]+ Stopped process " << stoppedJobs[i] << "\n";
-                        break;
-                    } else {
-                        cout << "[" << i + 1 << "]- Stopped process " << stoppedJobs[i] << "\n";
-                    }
-                }
-            } else {
-                cout << "No stopped jobs\n";
-            }
-
-            continue;
-        }
+        history.addToHistory(cmd);
 
         ParsedCommand parsedCmd = commandParser.parse(cmd);
-        // commandParser.debug(parsedCmd);
         if (!parsedCmd.isEmpty) {
             executor.execute(parsedCmd, childPID);
-            // executor.debug();
+            history.saveHistory();
+            history.resetHistoryIterator();
         }
     }
-
     return 0;
 }
