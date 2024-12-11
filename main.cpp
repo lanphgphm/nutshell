@@ -56,11 +56,13 @@ std::string readCommandLine(const std::string &prompt, History &history) {
                             cmd = history.getHistoryCommand(false);
                             history.updateCommandLine(prompt, cmd);
                         }
-                        std::cout << cmd << "\n" << std::flush;
+                        
                     }
                 }
+                continue; 
             } else {
                 cmd += c;
+        
             }
         }
     }
@@ -84,9 +86,9 @@ int main() {
 
     while (true) {
         std::cout << prompt << std::flush;
-        cmd = readCommandLine(prompt, history); // Call static method directly
-        if (cmd.empty()) continue; // Ignore empty commands
-        if (cmd == "exit") break;  // Exit the shell
+        cmd = readCommandLine(prompt, history);
+        if (cmd.empty()) continue; 
+        if (cmd == "exit") break;  
 
         history.addToHistory(cmd);
 
@@ -111,6 +113,7 @@ int main() {
 
         ParsedCommand parsedCmd = commandParser.parse(cmd);
         if (!parsedCmd.isEmpty) {
+            cout << "\n"; 
             executor.execute(parsedCmd, childPID);
             history.saveHistory();
             history.resetHistoryIterator();
