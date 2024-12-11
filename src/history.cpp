@@ -79,7 +79,8 @@ std::string History::getHistoryCommand(bool up) {
 }
 
 void History::updateCommandLine(const std::string &prompt, const std::string &command) {
-    std::cout << "\33[2K\r" << prompt << command << '\n' << std::flush; // Clear line, move to start, and print
+    // std::cout << "\33[2K\r" << prompt << command << '\n' << std::flush; // Clear line, move to start, and print
+    std::cout << "\33[2K\r" << std::flush;
 }
 
 void History::resetHistoryIterator() {
