@@ -165,11 +165,8 @@ void Executor::printError(int status, const string &command) {
 
 void Executor::addStoppedJob(pid_t pid) { stoppedJobs.push_back(pid); }
 
-pid_t Executor::getLastStoppedJob() {
-    if (!stoppedJobs.empty()) {
-        return stoppedJobs.back();
-    }
-    return -1; // No stopped jobs
+std::vector<pid_t> Executor::getStoppedJob() {
+    return stoppedJobs;
 }
 
 void Executor::removeStoppedJob(pid_t pid) {

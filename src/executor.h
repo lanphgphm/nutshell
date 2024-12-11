@@ -31,7 +31,7 @@ class Executor {
 
     // for handling stopped jobs (SIGTSTP)
     void addStoppedJob(pid_t pid);
-    pid_t getLastStoppedJob();
+    std::vector<pid_t> getStoppedJob();
     void removeStoppedJob(pid_t pid);
     int getStoppedJobsSize();
 
