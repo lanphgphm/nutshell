@@ -59,8 +59,10 @@ void History::saveHistory() const {
 }
 
 void History::addToHistory(const std::string &command) {
-    history.push_back(command);
-    historyIndex = history.size();
+    if (history.empty() || history.back() != command) { // Only add if different from the last command
+        history.push_back(command);
+        historyIndex = history.size();
+    }
 }
 
 std::string History::getHistoryCommand(bool up) {
@@ -79,9 +81,6 @@ std::string History::getHistoryCommand(bool up) {
 void History::updateCommandLine(const std::string &prompt, const std::string &command) {
     std::cout << "\33[2K\r" << prompt << command << std::flush; // Clear line, move to start, and print
 }
-
-
-
 
 bool History::readArrowKey(std::string &key) {
     char c;

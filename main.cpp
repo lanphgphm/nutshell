@@ -62,12 +62,13 @@ std::string readCommandLine(const std::string &prompt, History &history) {
                 }
             } else {
                 cmd += c;
-                std::cout << c << std::flush;
             }
         }
     }
     return cmd;
 }
+
+
 
 
 int main() {
@@ -86,7 +87,6 @@ int main() {
     while (true) {
         std::cout << prompt << std::flush;
         cmd = readCommandLine(prompt, history); // Call static method directly
-
         if (cmd.empty()) continue; // Ignore empty commands
         if (cmd == "exit") break;  // Exit the shell
 

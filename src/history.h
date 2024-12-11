@@ -11,28 +11,24 @@ public:
     ~History(); // Destructor to clean up resources
 
     // Methods to manage command history
-    void loadHistory();                       // Load command history from a file
-    void saveHistory() const;                 // Save command history to a file
-    void addToHistory(const std::string &command); // Add a command to the history
-    int size();                              // Get the size of the history
-    std::string getHistoryCommand(bool up);   // Get a command from history for UP/DOWN navigation
+    void loadHistory();                     
+    void saveHistory() const;                
+    void addToHistory(const std::string &command); 
+    int size();                              
+    std::string getHistoryCommand(bool up);  
 
-    // Utility methods
-    std::string getCurrentDirectory() const;  // Get the current working directory
-    bool fileExists(const std::string &filePath) const; // Check if a file exists
+    std::string getCurrentDirectory() const;
+    bool fileExists(const std::string &filePath) const; 
 
-    // Command line handling method
-    void updateCommandLine(const std::string &prompt, const std::string &command); // Update the command line
-    bool readArrowKey(std::string &key);     // Detect and read arrow key inputs (UP/DOWN)
+    void updateCommandLine(const std::string &prompt, const std::string &command); 
+    bool readArrowKey(std::string &key);     
 
 private:
-    std::vector<std::string> history;        // Store command history
-    size_t historyIndex;                     // Index for navigating history
-    std::string historyFilePath;             // Path to history file
-
-    // Private utility methods
-    void loadHistoryFromFile();              // Load history from a file
-    void saveHistoryToFile() const;          // Save history to a file
+    std::vector<std::string> history;        
+    size_t historyIndex;                     
+    std::string historyFilePath;             
+    void loadHistoryFromFile();              
+    void saveHistoryToFile() const;          
 };
 
-#endif // HISTORY_H
+#endif 
