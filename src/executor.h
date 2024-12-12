@@ -2,6 +2,8 @@
 #define EXECUTOR_H
 
 #include "command.h"
+#include "history.h"
+
 #include <algorithm> // find_if
 #include <cctype>    // isspace
 #include <cstdlib>   // getenv
@@ -17,8 +19,7 @@
 #include <unistd.h>    // fork, read, write, exec, dup, access, dup2, close, 3 fds
 #include <unordered_map>
 #include <string>
-#include "command.h"
-#include "history.h"
+
 
 class Executor {
   public:
@@ -38,12 +39,13 @@ class Executor {
     int getStoppedJobsSize();
 
   private:
-    void executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &child_pid);
+    static const std::unordered_map<int, std::string> signalMessages;
+    std::vector<pid_t> stoppedJobs;
+    
+    void executePiped(const ParsedCommand &cmd, int &statCmd1, int &statCmd2);
     void executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCmd2, pid_t &child_pid);
     void printError(int status, const std::string &command);
-    static const std::unordered_map<int, std::string> signalMessages;
-
-    std::vector<pid_t> stoppedJobs;
+    void ignoreTTOU(bool ignore); 
 };
 
 #endif // EXECUTOR_H

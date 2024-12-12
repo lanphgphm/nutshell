@@ -1,7 +1,3 @@
-// responsible for: handling interrupt signals, setting envvars, changing
-// prompts between users the important signals: SIGINT, SIGSTP, SIGCHLD,
-// SIGTERM, SIGKILL
-
 #include "src/command.h"
 #include "src/executor.h"
 #include "src/history.h"
@@ -48,8 +44,7 @@ std::string readCommandLine(const std::string &prompt, History &history) {
             } else if (c == BACKSPACE || c == '\b') {
                 if (!cmd.empty()) {
                     cmd.pop_back();
-                    history.updateCommandLine(prompt, cmd);
-                }
+                    history.updateCommandLine(prompt, cmd);                }
             } else if (c == '\033') {
                 char seq[2];
                 if (read(STDIN_FILENO, &seq[0], 1) == 1 && read(STDIN_FILENO, &seq[1], 1) == 1) {
@@ -61,10 +56,13 @@ std::string readCommandLine(const std::string &prompt, History &history) {
                             cmd = history.getHistoryCommand(false);
                             history.updateCommandLine(prompt, cmd);
                         }
+                        
                     }
                 }
+                continue; 
             } else {
                 cmd += c;
+        
             }
         }
     }
@@ -88,9 +86,9 @@ int main() {
 
     while (true) {
         std::cout << prompt << std::flush;
-        cmd = readCommandLine(prompt, history); // Call static method directly
-        if (cmd.empty()) continue; // Ignore empty commands
-        if (cmd == "exit") break;  // Exit the shell
+        cmd = readCommandLine(prompt, history);
+        if (cmd.empty()) continue; 
+        if (cmd == "exit") break;  
 
         history.addToHistory(cmd);
 
@@ -115,6 +113,7 @@ int main() {
 
         ParsedCommand parsedCmd = commandParser.parse(cmd);
         if (!parsedCmd.isEmpty) {
+            cout << "\n"; 
             executor.execute(parsedCmd, childPID);
             history.saveHistory();
             history.resetHistoryIterator();
