@@ -31,7 +31,9 @@ Past commands are saved in `.nutshell_history` file in the same directory as the
 ![alt text](assets/cmdhist.png)
 
 ### A graphic UI 
+Reusing an existing project of a group member, this shell has a frontend that was built and setup from scratch! 
 
+Source repo: [terminix](https://github.com/lanphgphm/terminix)
 
 ## Developer Setup 
 ### Requirements 
@@ -65,5 +67,5 @@ On MacOS:
 cmake -DCMAKE_C_COMPILER=/usr/local/bin/gcc-14 -DCMAKE_CXX_COMPILER=/usr/local/bin/g++-14 .. && cmake --build . && ./appnutshell
 ```
 ## User Installation
-
+Not ready to be shipped to end-user. 
 
