@@ -191,7 +191,7 @@ void Executor::executeAndOr(const ParsedCommand &cmd, int &statCmd1, int &statCm
         if (exitNormal && (exitStatus == 0))
             shouldExecuteNext = true;
     } else if (cmd.isOr) {
-        if (exitNormal && (exitStatus != 0))
+        if (!exitNormal || (exitStatus != 0))
             shouldExecuteNext = true;
     }
 
